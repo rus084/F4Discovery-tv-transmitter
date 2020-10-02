@@ -37,8 +37,14 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define GPIOA_MODER_8_11 (((uint8_t*)(&(GPIOA->MODER)))[2])
+#define GPIOA_OSPEEDR_8_11 (((uint8_t*)(&(GPIOA->OSPEEDR)))[2])
+#define MCO_CONTROL_REG GPIOA_OSPEEDR_8_11
 #define MCO_ON()  (GPIOA_MODER_8_11) = 2
 #define MCO_OFF() (GPIOA_MODER_8_11) = 0
+#define MCO_POWER_1() (GPIOA_OSPEEDR_8_11) = 0
+#define MCO_POWER_2() (GPIOA_OSPEEDR_8_11) = 1
+#define MCO_POWER_3() (GPIOA_OSPEEDR_8_11) = 2
+#define MCO_POWER_4() (GPIOA_OSPEEDR_8_11) = 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -127,35 +133,27 @@ void writeFB(int y,int x,int code)
   if (code)
     *data_ptr = 0;
   else
-  {
-    if (((xReal+yReal)%4) ==0)
-    {
-      *data_ptr = 0;
-    }
-    else
-      *data_ptr = 2;
-  }
+    *data_ptr = 2;
 }
 
 void init_fb()
 {
   for (int i=0;i<24;i++)
     for (int j=0;j<(420/HALF_DIV);j++)
-      frameBuf[i][j] = 2;
+      frameBuf[i][j] = 3;
   
   for (int i=0;i<312;i++)
-    for (int j=(390/HALF_DIV);j<(420/HALF_DIV);j++)
-      frameBuf[i][j] = 2;
-  
+    for (int j=(360/HALF_DIV);j<(420/HALF_DIV);j++)
+      frameBuf[i][j] = 3;
   
 #ifdef DOUBLE_BUFFER
     for (int i=0;i<24;i++)
     for (int j=0;j<(420/HALF_DIV);j++)
-      frameBuf2[i][j] = 2;
+      frameBuf2[i][j] = 3;
   
   for (int i=0;i<312;i++)
-    for (int j=(390/HALF_DIV);j<(420/HALF_DIV);j++)
-      frameBuf2[i][j] = 2;
+    for (int j=(360/HALF_DIV);j<(420/HALF_DIV);j++)
+      frameBuf2[i][j] = 3;
 #endif
 }
 
@@ -166,9 +164,8 @@ void clear_fb()
       int offset = (i * WIDTH);
       uint32_t* data_ptr = (uint32_t*)(&((uint8_t*)(frameBuf))[offset]);
       uint32_t pattern = 0x02020202;
-      pattern &= ~( 2 << (((i)%4)*8) );
       
-      for (int j=0;j<(390/HALF_DIV);j+=4)
+      for (int j=0;j<(375/HALF_DIV);j+=4)
       {
         *(data_ptr++) = pattern;
       }
@@ -325,11 +322,11 @@ int main(void)
   init_fb();
   clear_fb();
 #ifdef DOUBLE_BUFFER
-  HAL_TIM_Base_Start_DMA_DoubleBuffer(&htim1, (uint32_t*)frameBuf2, (uint32_t*)frameBuf2, (uint32_t*)(&(((uint8_t*)(&(GPIOA->MODER)))[2])) ,sizeof(frameBuf));
+  HAL_TIM_Base_Start_DMA_DoubleBuffer(&htim1, (uint32_t*)frameBuf2, (uint32_t*)frameBuf2, (uint32_t*)(&(MCO_CONTROL_REG)) ,sizeof(frameBuf));
 #else
-  HAL_TIM_Base_Start_DMA_DoubleBuffer(&htim1, (uint32_t*)frameBuf, (uint32_t*)(&frameBuf[0][sizeof(frameBuf)/2]), (uint32_t*)(&(((uint8_t*)(&(GPIOA->MODER)))[2])) ,sizeof(frameBuf)/2);
+  HAL_TIM_Base_Start_DMA_DoubleBuffer(&htim1, (uint32_t*)frameBuf, (uint32_t*)(&frameBuf[0][sizeof(frameBuf)/2]), (uint32_t*)(&(MCO_CONTROL_REG)) ,sizeof(frameBuf)/2);
 #endif
-  //HAL_TIM_Base_Start_DMA(&htim1, (uint32_t*)frameBuf, (uint32_t*)(&(((uint8_t*)(&(GPIOA->MODER)))[2])) ,sizeof(frameBuf));
+  //HAL_TIM_Base_Start_DMA(&htim1, (uint32_t*)frameBuf, (uint32_t*)(&(MCO_CONTROL_REG)) ,sizeof(frameBuf));
   
   BSP_LCD_SetColors(0xFFFF,  0x0000);
   BSP_LCD_SetFont(&Font24);
