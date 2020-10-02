@@ -9,7 +9,7 @@
 //#include "ets_sys.h"
 //#include "ntsc_broadcast.h"
 
-#define FBW 232 //Must be divisible by 8.  These are actually "double-pixels" used for double-resolution monochrome width.
+#define FBW 464 //Must be divisible by 8.  These are actually "double-pixels" used for double-resolution monochrome width.
 #define FBW2 (FBW/2) //Actual width in true pixels.
 #define FBH 220
 

@@ -95,8 +95,8 @@ void wait_Vsync()
   V_flag = 0;
 }
 
-// put white pixel at y,x coordinates
-void writeFBW(int y,int x)
+// put white pixel at y,x from 3d.c
+void CNFGTackPixel( int x, int y )
 {
   if (x>(264/HALF_DIV))
     return;

@@ -17,10 +17,8 @@
 #define m31 13
 #define m32 14
 #define m33 15
-static inline void CNFGTackPixel( int x, int y ) //Unsafe plot pixel.
-{
-  writeFBW( y, x);
-}
+
+void CNFGTackPixel( int x, int y ); //Unsafe plot pixel.
 
 uint8_t * frontframe;
 int16_t ModelviewMatrix[16];
